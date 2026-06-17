@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HOW TO LIVE?</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ===================== PARTICLE CANVAS ===================== -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- ===================== BACK BUTTON ===================== -->
+<button id="back-btn" aria-label="뒤로가기">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+</button>
+
+<!-- ===================== SCREEN 1: TITLE ===================== -->
+<section id="screen-title" class="screen active">
+  <div id="title-content">
+    <img src="img/title.png" alt="HOW TO LIVE?" id="title-img" onerror="this.style.display='none'; document.getElementById('title-text').style.display='block'" />
+    <h1 id="title-text" style="display:none">HOW TO LIVE?</h1>
+    <p id="title-sub">보드게임 설명 포트폴리오</p>
+    <p id="title-hint">터치하거나 클릭하세요</p>
+  </div>
+</section>
+
+<!-- ===================== SCREEN 2: MAIN MENU ===================== -->
+<section id="screen-menu" class="screen">
+  <nav id="menu-arc">
+    <!-- Arc 순서: 게임 규칙(0) 점수 카드(1) 게임보드(2) 건물 카드(3) 전하고싶은말(4) -->
+    <div class="menu-item" data-target="screen-rules" data-index="0">
+      <div class="menu-card">
+        <div class="menu-card-inner">
+          <div class="menu-card-front">
+            <img src="img/menu_2.png" alt="게임 규칙" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+            <span class="menu-fallback-icon" style="display:none">📋</span>
+          </div>
+          <div class="menu-card-back"></div>
+        </div>
+      </div>
+      <span class="menu-label">게임 규칙</span>
+    </div>
+    <div class="menu-item" data-target="screen-score" data-index="1">
+      <div class="menu-card">
+        <div class="menu-card-inner">
+          <div class="menu-card-front">
+            <img src="img/menu_4.png" alt="점수 카드" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+            <span class="menu-fallback-icon" style="display:none">🃏</span>
+          </div>
+          <div class="menu-card-back"></div>
+        </div>
+      </div>
+      <span class="menu-label">점수 카드</span>
+    </div>
+    <div class="menu-item" data-target="screen-gameboard" data-index="2">
+      <div class="menu-card">
+        <div class="menu-card-inner">
+          <div class="menu-card-front">
+            <img src="img/menu_1.png" alt="게임보드" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+            <span class="menu-fallback-icon" style="display:none">♟</span>
+          </div>
+          <div class="menu-card-back"></div>
+        </div>
+      </div>
+      <span class="menu-label">게임보드</span>
+    </div>
+    <div class="menu-item" data-target="screen-build" data-index="3">
+      <div class="menu-card">
+        <div class="menu-card-inner">
+          <div class="menu-card-front">
+            <img src="img/menu_3.png" alt="건물 카드" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+            <span class="menu-fallback-icon" style="display:none">🏛</span>
+          </div>
+          <div class="menu-card-back"></div>
+        </div>
+      </div>
+      <span class="menu-label">건물 카드</span>
+    </div>
+    <div class="menu-item" data-target="screen-message" data-index="4">
+      <div class="menu-card">
+        <div class="menu-card-inner">
+          <div class="menu-card-front">
+            <img src="img/menu_5.png" alt="전하고 싶은 말" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+            <span class="menu-fallback-icon" style="display:none">✉</span>
+          </div>
+          <div class="menu-card-back"></div>
+        </div>
+      </div>
+      <span class="menu-label">전하고 싶은 말</span>
+    </div>
+  </nav>
+
+  <!-- 게임 어시스턴트 사이트 (주사위 버튼) -->
+  <div class="dice-item" id="dice-assistant-btn" role="button" tabindex="0" aria-label="게임 어시스턴트 사이트">
+    <div class="dice-icon">🎲</div>
+    <span class="menu-label dice-label">게임 어시스턴트 사이트</span>
+  </div>
+</section>
+
+<!-- ===================== SCREEN 3: GAMEBOARD ===================== -->
+<section id="screen-gameboard" class="screen light-screen">
+  <div id="gameboard-container">
+    <img src="img/gameboard.png" alt="게임보드" id="gameboard-img" />
+    <!-- Hotspots -->
+    <div class="hotspot" data-zone="topLeft"     style="top:8%;  left:8%;  width:25%; height:28%"></div>
+    <div class="hotspot" data-zone="topRight"    style="top:8%;  right:8%; width:25%; height:28%"></div>
+    <div class="hotspot" data-zone="center"      style="top:35%; left:35%; width:30%; height:30%"></div>
+    <div class="hotspot" data-zone="bottomLeft"  style="bottom:8%;left:8%; width:25%; height:28%"></div>
+    <div class="hotspot" data-zone="bottomRight" style="bottom:8%;right:8%;width:25%; height:28%"></div>
+  </div>
+
+  <!-- Hotspot overlay modal -->
+  <div id="hotspot-overlay" class="hidden">
+    <div id="hotspot-modal">
+      <button id="hotspot-close">✕</button>
+      <div id="hotspot-zoom-area">
+        <img src="img/gameboard.png" id="hotspot-zoomed-img" alt="" />
+      </div>
+      <p id="hotspot-desc"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SCREEN 4: RULES ===================== -->
+<section id="screen-rules" class="screen scroll-screen">
+  <div class="text-content" id="rules-content">
+    <h2>게임 규칙</h2>
+    <div id="rules-body">불러오는 중...</div>
+  </div>
+</section>
+
+<!-- ===================== SCREEN 5: SCORE CARDS ===================== -->
+<section id="screen-score" class="screen light-screen">
+  <div class="card-screen">
+    <h2 class="card-screen-title">점수 카드</h2>
+    <div class="card-viewport" id="score-viewport">
+      <div class="card-track" id="score-track"></div>
+    </div>
+    <div class="card-nav">
+      <button class="card-arrow" id="score-prev">&#8249;</button>
+      <span class="card-counter" id="score-counter">1 / 35</span>
+      <button class="card-arrow" id="score-next">&#8250;</button>
+    </div>
+    <p class="card-subtitle" id="score-subtitle"></p>
+    <p class="card-desc" id="score-desc"></p>
+  </div>
+</section>
+
+<!-- ===================== SCREEN 6: BUILD CARDS ===================== -->
+<section id="screen-build" class="screen light-screen">
+  <div class="card-screen">
+    <h2 class="card-screen-title">건물 카드</h2>
+    <div class="card-viewport" id="build-viewport">
+      <div class="card-track" id="build-track"></div>
+    </div>
+    <div class="card-nav">
+      <button class="card-arrow" id="build-prev">&#8249;</button>
+      <span class="card-counter" id="build-counter">1 / 15</span>
+      <button class="card-arrow" id="build-next">&#8250;</button>
+    </div>
+    <p class="card-subtitle" id="build-subtitle"></p>
+    <p class="card-desc" id="build-desc"></p>
+  </div>
+</section>
+
+<!-- ===================== SCREEN 7: MESSAGE ===================== -->
+<section id="screen-message" class="screen scroll-screen">
+  <div class="text-content" id="message-content">
+    <h2>전하고 싶은 말</h2>
+    <div id="message-body">불러오는 중...</div>
+  </div>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>

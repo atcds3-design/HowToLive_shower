@@ -1,0 +1,533 @@
+/* ============================================================
+   HOW TO LIVE? — style.css  (v2)
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Dark screens (title + menu) */
+  --bg:           #0a0a0c;
+  --surface:      #111116;
+  --border:       #2a2a35;
+  --text:         #e8e4dc;
+  --text-muted:   #7a7870;
+  --accent:       #c8a96e;
+  --accent-dim:   #8a7248;
+
+  /* Light screens (game content) */
+  --light-bg:     #f2ede6;   /* warm parchment — low saturation */
+  --light-surface:#faf7f2;
+  --light-border: #d6cfc4;
+  --light-text:   #2e2a24;
+  --light-muted:  #8a8278;
+
+  --radius:       12px;
+  --spring:       0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --fade:         0.28s ease;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   PARTICLE CANVAS
+   ============================================================ */
+#particle-canvas {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.05;
+}
+
+/* ============================================================
+   BACK BUTTON
+   ============================================================ */
+#back-btn {
+  position: fixed;
+  top: 18px; left: 18px;
+  z-index: 9000;
+  width: 40px; height: 40px;
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  background: rgba(10,10,12,0.72);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.22s ease, transform var(--spring), background 0.2s, border-color 0.2s, color 0.2s;
+}
+#back-btn svg { width: 18px; height: 18px; }
+#back-btn.visible { opacity: 1; pointer-events: auto; }
+#back-btn:hover { background: rgba(200,169,110,0.18); transform: scale(1.12); }
+#back-btn:active { transform: scale(0.92); }
+
+/* On light screens, back button adapts */
+body.light-active #back-btn {
+  border-color: var(--light-border);
+  background: rgba(242,237,230,0.82);
+  color: var(--light-text);
+}
+body.light-active #back-btn:hover {
+  background: rgba(200,169,110,0.22);
+}
+
+/* ============================================================
+   SCREENS
+   ============================================================ */
+.screen {
+  position: fixed; inset: 0;
+  z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.42s ease;
+}
+.screen.active { opacity: 1; pointer-events: auto; }
+.screen.scroll-screen { overflow-y: auto; align-items: flex-start; }
+
+/* Light-background screens */
+.light-screen { background: var(--light-bg); }
+.light-screen .card-screen-title  { color: var(--light-text); }
+.light-screen .card-counter        { color: var(--light-muted); }
+.light-screen .card-subtitle       { color: var(--light-muted); }
+.light-screen .card-desc           { color: var(--light-text); }
+.light-screen .card-arrow {
+  border-color: var(--light-border);
+  color: var(--light-text);
+  background: var(--light-surface);
+}
+.light-screen .card-arrow:hover {
+  background: rgba(200,169,110,0.18);
+  border-color: var(--accent);
+}
+.light-screen .text-content h2 {
+  color: var(--accent-dim);
+  border-bottom-color: var(--light-border);
+}
+.light-screen .text-content #rules-body,
+.light-screen .text-content #message-body { color: var(--light-text); }
+.light-screen::-webkit-scrollbar-thumb { background: var(--light-border); }
+
+/* ============================================================
+   SCREEN 1 — TITLE
+   ============================================================ */
+#screen-title { background: var(--bg); cursor: pointer; }
+
+#title-content {
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  transition: transform 0.8s cubic-bezier(0.4,0,0.2,1), opacity 0.8s ease;
+}
+#title-content.exit { transform: translateY(-60px); opacity: 0; }
+
+#title-img {
+  max-width: min(480px, 70vw); max-height: 38vh;
+  object-fit: contain;
+  animation: breathe 4s ease-in-out infinite;
+}
+#title-text {
+  font-size: clamp(2.4rem, 8vw, 5rem);
+  font-weight: 700; letter-spacing: 0.18em;
+  color: var(--accent);
+  text-shadow: 0 0 60px rgba(200,169,110,0.35);
+  animation: breathe 4s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%,100% { filter: drop-shadow(0 0 30px rgba(200,169,110,0.2)); }
+  50%      { filter: drop-shadow(0 0 55px rgba(200,169,110,0.45)); }
+}
+
+#title-sub {
+  font-size: clamp(0.72rem, 2vw, 0.95rem);
+  letter-spacing: 0.22em;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+#title-hint {
+  font-size: 0.78rem; letter-spacing: 0.22em;
+  color: var(--text-muted);
+  margin-top: 8px;
+  animation: hint-pulse 2.4s ease-in-out infinite;
+}
+@keyframes hint-pulse { 0%,100%{opacity:0.35;} 50%{opacity:1;} }
+
+/* ============================================================
+   SCREEN 2 — MAIN MENU  (card-shaped buttons, upward arc)
+   ============================================================ */
+#screen-menu { background: var(--bg); }
+
+#menu-arc {
+  position: relative;
+  width: min(980px, 95vw);
+  height: min(620px, 72vh);
+}
+
+/* --- Card-shaped menu buttons --- */
+.menu-item {
+  position: absolute;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.4s ease, transform var(--spring);
+}
+
+/* Arc layout — 5 items along an upward-opening arc
+   Arc formula: x = cx + r·sin(θ),  y = bottom - r·(1-cos(θ))
+   We spread items at θ = -80°,-40°,0°,40°,80° on a radius ≈ 58% of container height */
+
+/* Initial (hidden) positions: slide up from below */
+.menu-item[data-index="0"] { left:2%;   bottom:5%;  transform:translateY(28px) scale(0.88); }
+.menu-item[data-index="1"] { left:20%;  bottom:30%; transform:translateY(28px) scale(0.88); }
+.menu-item[data-index="2"] { left:50%;  bottom:44%; transform:translateX(-50%) translateY(28px) scale(0.88); }
+.menu-item[data-index="3"] { right:20%; bottom:30%; transform:translateY(28px) scale(0.88); }
+.menu-item[data-index="4"] { right:2%;  bottom:5%;  transform:translateY(28px) scale(0.88); }
+
+/* Entered (visible) positions */
+.menu-item[data-index="0"].entered { opacity:1; transform:translateY(0) scale(1); }
+.menu-item[data-index="1"].entered { opacity:1; transform:translateY(0) scale(1); }
+.menu-item[data-index="2"].entered { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+.menu-item[data-index="3"].entered { opacity:1; transform:translateY(0) scale(1); }
+.menu-item[data-index="4"].entered { opacity:1; transform:translateY(0) scale(1); }
+
+/* Card shape: 6.5 : 9 ratio */
+.menu-card {
+  width:  clamp(100px, 13vw, 155px);
+  height: calc(clamp(100px, 13vw, 155px) * 9 / 6.5);
+  perspective: 600px;
+}
+.menu-card-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  border-radius: var(--radius);
+  transition: transform 0.55s cubic-bezier(0.34,1.3,0.64,1),
+              box-shadow 0.25s ease;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+}
+.menu-card-front,
+.menu-card-back {
+  position: absolute; inset: 0;
+  border-radius: var(--radius);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+}
+.menu-card-front {
+  background: var(--surface);
+}
+.menu-card-front img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.menu-fallback-icon {
+  font-size: 1.8rem;
+  position: absolute;
+}
+.menu-card-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(145deg, #1c1a14, #2a2618);
+  border-color: var(--accent-dim);
+}
+
+/* Hover: lift + tilt */
+.menu-item:hover .menu-card-inner {
+  transform: translateY(-8px) scale(1.1) rotateY(6deg);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px var(--accent-dim);
+}
+.menu-item:active .menu-card-inner {
+  transform: translateY(0) scale(0.94);
+  transition: transform 0.1s ease;
+}
+
+.menu-label {
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.menu-item:hover .menu-label { color: var(--accent); }
+
+/* --- 게임 어시스턴트 사이트 (주사위 버튼) --- */
+.dice-item {
+  position: absolute;
+  left: 50%; bottom: 3.5vh;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  cursor: pointer;
+  z-index: 30;
+}
+.dice-icon {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  line-height: 1;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+  transition: transform var(--spring), box-shadow 0.25s ease, border-color 0.2s, background 0.2s;
+}
+.dice-item:hover .dice-icon {
+  transform: translateY(-6px) scale(1.1);
+  border-color: var(--accent-dim);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px var(--accent-dim);
+}
+.dice-item:active .dice-icon {
+  transform: translateY(0) scale(0.94);
+  transition: transform 0.1s ease;
+}
+.dice-item:hover .dice-label { color: var(--accent); }
+
+/* ============================================================
+   SCREEN 3 — GAMEBOARD
+   ============================================================ */
+#screen-gameboard { overflow: hidden; background: #3a3a3e; }
+
+#gameboard-container {
+  position: relative;
+  width: min(85vw, calc(85vh * 16/9));
+  aspect-ratio: 16/9;
+  display: flex; align-items: center; justify-content: center;
+}
+
+#gameboard-img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  transition: transform 0.14s ease;
+  display: block;
+}
+
+.hotspot {
+  position: absolute;
+  border: 1.5px dashed rgba(200,169,110,0);
+  border-radius: 6px;
+  cursor: crosshair;
+  transition: background 0.22s, border-color 0.22s;
+}
+.hotspot:hover {
+  background: rgba(200,169,110,0.08);
+  border-color: rgba(200,169,110,0.4);
+}
+/* NO ::after pseudo-element → '+' removed */
+
+/* Modal */
+#hotspot-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.88);
+  display: flex; align-items: center; justify-content: center;
+  animation: fade-in 0.28s ease;
+}
+#hotspot-overlay.hidden { display: none; }
+@keyframes fade-in { from{opacity:0;} to{opacity:1;} }
+
+#hotspot-modal {
+  background: var(--light-surface);
+  border: 1px solid var(--light-border);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 600px; width: 90vw;
+  display: flex; flex-direction: column; gap: 16px;
+  animation: modal-pop 0.38s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modal-pop { from{transform:scale(0.88);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+#hotspot-close {
+  align-self: flex-end;
+  background: none; border: none;
+  color: var(--light-muted); font-size: 1rem;
+  cursor: pointer; padding: 2px 7px; border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+#hotspot-close:hover { color: var(--light-text); background: var(--light-border); }
+
+#hotspot-zoom-area {
+  width: 100%; aspect-ratio: 16/9;
+  overflow: hidden; border-radius: 10px;
+  background: #000; position: relative;
+}
+#hotspot-zoomed-img {
+  width: 100%; height: 100%; object-fit: cover;
+  transform-origin: 0 0;
+  transition: transform 0.6s cubic-bezier(0.34,1.2,0.64,1);
+}
+#hotspot-desc {
+  font-size: 0.88rem; line-height: 1.8;
+  color: var(--light-text);
+  border-left: 2.5px solid var(--accent);
+  padding-left: 14px;
+  white-space: pre-wrap;
+}
+
+/* ============================================================
+   TEXT SCREENS
+   ============================================================ */
+.text-content {
+  max-width: 680px; width: 90%;
+  margin: 80px auto 80px;
+}
+.text-content h2 {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700; letter-spacing: 0.08em;
+  margin-bottom: 32px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--accent);
+}
+.text-content #rules-body,
+.text-content #message-body {
+  font-size: 0.92rem; line-height: 1.95;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+/* ============================================================
+   CARD SCREENS
+   ============================================================ */
+.card-screen {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px; padding: 20px;
+}
+
+.card-screen-title {
+  font-size: clamp(0.95rem, 2.5vw, 1.4rem);
+  font-weight: 700; letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+/* Card viewport — 6.5:9 ratio */
+.card-viewport {
+  height: min(62vh, calc(72vw * 9 / 6.5));
+  width:  min(calc(62vh * 6.5 / 9), 72vw);
+  position: relative; overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.card-track {
+  display: flex; height: 100%;
+  transition: transform 0.45s cubic-bezier(0.34,1.2,0.64,1);
+  will-change: transform;
+}
+
+.card-item {
+  flex: 0 0 100%; height: 100%;
+  perspective: 900px;
+}
+
+.card-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.34,1.2,0.64,1);
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+.card-inner.flipped { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--light-surface);
+  border: 1px solid var(--light-border);
+  display: flex; align-items: center; justify-content: center;
+}
+.card-face.back { transform: rotateY(180deg); }
+.card-face img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+
+.card-placeholder {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  font-size: 0.85rem; color: var(--light-muted);
+  letter-spacing: 0.06em;
+}
+
+.card-nav {
+  display: flex; align-items: center; gap: 20px;
+}
+.card-arrow {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 1.5rem; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform var(--spring), background 0.2s, border-color 0.2s;
+  user-select: none;
+}
+.card-arrow:hover {
+  background: rgba(200,169,110,0.14);
+  border-color: var(--accent);
+  transform: scale(1.12);
+}
+.card-arrow:active { transform: scale(0.9); }
+
+.card-counter {
+  font-size: 0.78rem; letter-spacing: 0.12em;
+  color: var(--text-muted); min-width: 58px; text-align: center;
+}
+
+.card-subtitle {
+  font-size: 0.8rem; font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  min-height: 1.1em;
+}
+
+/* Card description (new) */
+.card-desc {
+  font-size: 0.82rem; line-height: 1.75;
+  color: var(--light-text);
+  max-width: min(calc(62vh * 6.5 / 9), 72vw);
+  text-align: center;
+  min-height: 2.4em;
+  transition: opacity 0.22s;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+.scroll-screen::-webkit-scrollbar { width: 4px; }
+.scroll-screen::-webkit-scrollbar-track { background: transparent; }
+.scroll-screen::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+@media (orientation: portrait) {
+  #menu-arc {
+    width: min(580px, 93vw);
+    height: min(420px, 70vh);
+  }
+  .menu-item[data-index="0"] { left: 5%;  bottom: 0%; }
+  .menu-item[data-index="1"] { left: 21%; bottom: 36%; }
+  .menu-item[data-index="2"] { bottom: 50%; }
+  .menu-item[data-index="3"] { right: 21%;bottom: 36%; }
+  .menu-item[data-index="4"] { right: 5%; bottom: 0%; }
+}
+@media (max-width: 480px) {
+  .menu-card { width: 80px; height: calc(80px * 9 / 6.5); }
+  .menu-label { font-size: 0.58rem; }
+  .dice-icon { width: 42px; height: 42px; font-size: 1.25rem; }
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.hidden { display: none !important; }
